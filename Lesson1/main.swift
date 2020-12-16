@@ -18,14 +18,43 @@ class Bar: NSObject {
 }
 
 class Foo: CustomStringConvertible, CustomDebugStringConvertible {
+    let name = "Jaekyung"
+    let age = 25
+//    
     var description: String {
         return "Foo Description"
     }
-    
+    /*
     var debugDescription: String {
-        return "Debug Foo Description"
+//        return "Debug Foo Descriptionpo"
+
+        // Complicated
+        let className = type(of: self)
+        let address = "\(Unmanaged.passUnretained(self as AnyObject).toOpaque())" // extract address
+        return "<\(className) : \(address)>"
     }
-    
+     */
+}
+
+// extension으로 뽑아내기
+extension CustomDebugStringConvertible {
+    var debugDescription: String {
+        
+        let className = type(of: self)
+        let address = "\(Unmanaged.passUnretained(self as AnyObject).toOpaque())" // extract address
+        var description = "<\(className) : \(address), {"
+        
+        let mirror = Mirror(reflecting: self)
+        description += mirror.children.compactMap{ (arg) -> String? in
+            let (label, value) = arg
+            guard let propertyName = label else { return nil }
+            return "\(propertyName) : \(value)"
+        }.joined(separator: ", ")
+
+        description += "}>"
+
+        return description
+    }
 }
 
 let bar = Bar()
